@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Granja Idle - Gana Dinero</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --accent: #ff9800;
+            --background: #f4f6f8;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #dddddd;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+        .stats-bar {
+            background: #1b5e20;
+            color: #ffeb3b;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+        .content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            max-height: calc(100vh - 150px);
+        }
+        .card {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .card-info {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        button {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .btn-accent {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-withdraw {
+            background: #e91e63;
+        }
+        .progress-container {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 100;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .modal-content h3 {
+            color: var(--primary);
+        }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .close-modal {
+            background: #757575;
+            margin-top: 5px;
+        }
+        .ads-banner {
+            background: #fff3e0;
+            border: 1px dashed var(--accent);
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #d84315;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🌱 Mi Granja Digital Tycoon</h1>
+        <p style="font-size: 0.8rem;">¡Genera recursos y solicita tus pagos!</p>
+    </header>
+
+    <div class="stats-bar">
+        <div>Monedas: <span id="coins">0</span> 🪙</div>
+        <div>USD Equiv: $<span id="usdValue">0.00</span></div>
+    </div>
+
+    <div class="content">
+        <!-- Banner Publicitario Simulado -->
+        <div class="ads-banner">
+            📢 Espacio para Anuncios (AdMob / Adsterra)
+            <br><button class="btn-accent" style="margin-top: 8px; padding: 6px 12px; font-size: 0.8rem;" onclick="watchAdModal()">Ver Anuncio (+5,000 Monedas)</button>
+        </div>
+
+        <!-- Cerdito / Ganado -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🐖 Crianza de Cerdos</span>
+                <span class="card-info" id="pigCount">Nivel 1</span>
+            </div>
+            <p class="card-info">Produce: <span id="pigProd">10</span> monedas/seg</p>
+            <button id="buyPigBtn" onclick="upgradePig()">Mejorar Cerdos (<span id="pigCost">50</span> 🪙)</button>
+        </div>
+
+        <!-- Cultivo de Ají -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🌶️ Cultivo de Ají Picante</span>
+                <span class="card-info" id="pepperCount">Nivel 0</span>
+            </div>
+            <p class="card-info">Produce: <span id="pepperProd">0</span> monedas/seg</p>
+            <button id="buyPepperBtn" onclick="upgradePepper()">Comprar / Mejorar (<span id="pepperCost">200</span> 🪙)</button>
+        </div>
+
+        <!-- Cosecha Manual por Clic -->
+        <div class="card" style="text-align: center; background: #e8f5e9;">
+            <span class="card-title">🚜 Trabajo Manual en la Granja</span>
+            <p class="card-info">Toca para recolectar recursos al instante</p>
+            <button onclick="harvestManual()" style="background: #2e7d32; font-size: 1.1rem; padding: 12px;">¡Recolectar Cosecha! (+<span id="clickPower">1</span>)</button>
+        </div>
+
+        <!-- Botón de Retiro -->
+        <button class="btn-withdraw" onclick="openWithdrawModal()">💰 Solicitar Retiro de Dinero</button>
+    </div>
+</div>
+
+<!-- Modal de Anuncios -->
+<div class="modal" id="ad
