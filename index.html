@@ -227,4 +227,164 @@
 </div>
 
 <!-- Modal de Anuncios -->
-<div class="modal" id="ad
+<div class="modal" id="adModal">
+    <div class="modal-content" style="text-align: center;">
+        <h3>📺 Reproduciendo Anuncio...</h3>
+        <p>Espera a que finalice el vídeo promocional para reclamar tu recompensa.</p>
+        <div class="progress-container">
+            <div class="progress-bar" id="adProgressBar"></div>
+        </div>
+        <p id="adTimer" style="font-weight: bold; margin-top: 5px;">5s</p>
+    </div>
+</div>
+
+<!-- Modal de Retiro -->
+<div class="modal" id="withdrawModal">
+    <div class="modal-content">
+        <h3>🏦 Solicitar Pago</h3>
+        <p style="font-size: 0.85rem; color: #555;">Mínimo para retiro: <strong>$5.00 (5,000,000 Monedas)</strong></p>
+        <label style="font-size: 0.85rem;">Método de Pago:</label>
+        <select id="payMethod">
+            <option value="pagomovil">Pago Móvil (Venezuela)</option>
+            <option value="binance">Binance (USDT)</option>
+            <option value="paypal">PayPal</option>
+        </select>
+        <label style="font-size: 0.85rem;">Datos de Cuenta / Teléfono:</label>
+        <input type="text" id="payDetails" placeholder="Ej: 0412-1234567 o Correo">
+        <button onclick="requestWithdraw()">Enviar Solicitud</button>
+        <button class="close-modal" onclick="closeWithdrawModal()">Cancelar</button>
+    </div>
+</div>
+
+<script>
+    let gameData = {
+        coins: 100,
+        clickPower: 1,
+        pig: { level: 1, cost: 50, prod: 10 },
+        pepper: { level: 0, cost: 200, prod: 35 }
+    };
+
+    const CONVERSION_RATE = 1000000;
+
+    function saveGame() {
+        localStorage.setItem('farmGameData', JSON.stringify(gameData));
+    }
+
+    function loadGame() {
+        let saved = localStorage.getItem('farmGameData');
+        if (saved) {
+            gameData = JSON.parse(saved);
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('coins').innerText = Math.floor(gameData.coins).toLocaleString();
+        document.getElementById('usdValue').innerText = (gameData.coins / CONVERSION_RATE).toFixed(2);
+        
+        document.getElementById('pigCount').innerText = `Nivel ${gameData.pig.level}`;
+        document.getElementById('pigProd').innerText = gameData.pig.level * 10;
+        document.getElementById('pigCost').innerText = gameData.pig.cost;
+        
+        document.getElementById('pepperCount').innerText = `Nivel ${gameData.pepper.level}`;
+        document.getElementById('pepperProd').innerText = gameData.pepper.level * 35;
+        document.getElementById('pepperCost').innerText = gameData.pepper.cost;
+        
+        document.getElementById('clickPower').innerText = gameData.clickPower;
+    }
+
+    function harvestManual() {
+        gameData.coins += gameData.clickPower;
+        updateUI();
+    }
+
+    function upgradePig() {
+        if (gameData.coins >= gameData.pig.cost) {
+            gameData.coins -= gameData.pig.cost;
+            gameData.pig.level++;
+            gameData.pig.cost = Math.floor(gameData.pig.cost * 1.5);
+            updateUI();
+            saveGame();
+        } else {
+            alert("No tienes suficientes monedas.");
+        }
+    }
+
+    function upgradePepper() {
+        if (gameData.coins >= gameData.pepper.cost) {
+            gameData.coins -= gameData.pepper.cost;
+            gameData.pepper.level++;
+            gameData.pepper.cost = Math.floor(gameData.pepper.cost * 1.6);
+            updateUI();
+            saveGame();
+        } else {
+            alert("No tienes suficientes monedas.");
+        }
+    }
+
+    setInterval(() => {
+        let passiveIncome = (gameData.pig.level * 10) + (gameData.pepper.level * 35);
+        gameData.coins += passiveIncome;
+        updateUI();
+        saveGame();
+    }, 1000);
+
+    function watchAdModal() {
+        const modal = document.getElementById('adModal');
+        const progressBar = document.getElementById('adProgressBar');
+        const timerText = document.getElementById('adTimer');
+        modal.style.display = 'flex';
+        
+        let timeLeft = 5;
+        progressBar.style.width = '0%';
+        timerText.innerText = timeLeft + 's';
+
+        let adInterval = setInterval(() => {
+            timeLeft--;
+            timerText.innerText = timeLeft + 's';
+            progressBar.style.width = ((5 - timeLeft) / 5) * 100 + '%';
+
+            if (timeLeft <= 0) {
+                clearInterval(adInterval);
+                modal.style.display = 'none';
+                gameData.coins += 5000;
+                updateUI();
+                saveGame();
+                alert("¡Anuncio visto con éxito! Has ganado 5,000 monedas 🪙");
+            }
+        }, 1000);
+    }
+
+    function openWithdrawModal() {
+        document.getElementById('withdrawModal').style.display = 'flex';
+    }
+
+    function closeWithdrawModal() {
+        document.getElementById('withdrawModal').style.display = 'none';
+    }
+
+    function requestWithdraw() {
+        let minCoinsNeeded = 5000000;
+        if (gameData.coins < minCoinsNeeded) {
+            alert("Saldo insuficiente. El mínimo de retiro es de 5,000,000 monedas ($5.00 USD). ¡Sigue viendo anuncios y jugando!");
+            return;
+        }
+
+        let details = document.getElementById('payDetails').value;
+        if (!details) {
+            alert("Por favor ingresa tus datos de pago.");
+            return;
+        }
+
+        alert("¡Solicitud de retiro enviada con éxito! Será procesada manualmente en las próximas 24-48 horas tras verificar tus visualizaciones de anuncios.");
+        gameData.coins -= minCoinsNeeded;
+        updateUI();
+        saveGame();
+        closeWithdrawModal();
+    }
+
+    loadGame();
+    updateUI();
+</script>
+
+</body>
+</html>
